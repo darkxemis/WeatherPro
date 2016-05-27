@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="activity_city">20sp</dimen>
+    <dimen name="activity_date">18sp</dimen>
+    <dimen name="activity_margin_degrees">40dp</dimen>
+    <dimen name="activity_humidity">14dp</dimen>
+    <dimen name="activity_description">14dp</dimen>
+
+    <!-- nav_header -->
+
+    <dimen name="nav_header_vertical_spacing">6dp</dimen>
+</resources>

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#26C6DA</color>
-    <color name="colorPrimaryDark">#26C6DA</color>
-    <color name="textColorPrimary">#ffffff</color>
+    <color name="colorPrimary">#bfeff5</color>
+    <color name="colorPrimaryDark">#bfeff5</color>
+    <color name="textColorPrimary">#da575757</color>
     <color name="colorAccent">#FF4081</color>
+
+    <!-- Color nav header -->
+    <color name="background_header">#bfeff5</color>
 </resources>

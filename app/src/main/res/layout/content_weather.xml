@@ -14,56 +14,40 @@
     tools:context="com.example.josemi.weatherpro.WeatherActivity"
     tools:showIn="@layout/app_bar_weather">
 
-    <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-        </ScrollView>
-    </android.support.v4.widget.SwipeRefreshLayout>
-
     <TextView
         android:id="@+id/city"
-        style="?android:attr/textAppearanceMedium"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:textStyle="bold"
         android:gravity="top|center"
-        android:textSize="18dp"
+        android:textSize="@dimen/activity_city"
         android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/container"
-        android:layout_alignEnd="@+id/container"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <TextView
         android:id="@+id/date"
-        style="?android:attr/textAppearanceMedium"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:textStyle="bold"
         android:layout_marginTop="25dp"
         android:gravity="top|center"
-        android:textSize="16dp"
+        android:textSize="@dimen/activity_date"
+
         android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/container"
-        android:layout_alignEnd="@+id/container"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignLeft="@+id/frameLayout"
+        android:layout_alignStart="@+id/frameLayout"
+        android:layout_alignRight="@+id/frameLayout"
+        android:layout_alignEnd="@+id/frameLayout" />
 
     <ImageView
         android:layout_width="32dp"
         android:layout_height="32dp"
-        style="?android:attr/textAppearanceMedium"
-        android:id="@+id/condIconTitule"
-        android:layout_gravity="center"
-        android:layout_alignTop="@+id/city"
-        android:layout_toLeftOf="@+id/temperature"
-        android:layout_toStartOf="@+id/temperature" />
+        android:layout_marginTop="150dp"
+        android:layout_marginLeft="180dp"
+        android:id="@+id/condIconTitule" />
 
     <FrameLayout
         android:layout_width="250dp"
@@ -93,7 +77,7 @@
             android:textStyle="bold"
             android:layout_marginBottom="50dp"
             android:gravity="top|center"
-            android:textSize="16dp"
+            android:textSize="@dimen/activity_description"
             android:layout_alignParentTop="true"
             android:layout_alignRight="@+id/frameLayout"
             android:layout_alignEnd="@+id/frameLayout"
@@ -109,7 +93,7 @@
             android:textStyle="bold"
             android:layout_marginBottom="25dp"
             android:gravity="top|center"
-            android:textSize="16dp"
+            android:textSize="@dimen/activity_humidity"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_above="@+id/temperature"
             android:layout_centerHorizontal="true" />
@@ -123,10 +107,10 @@
         android:layout_height="85dp"
 
         android:textStyle="bold"
-        android:textSize="70dp"
+        android:textSize="70sp"
         android:gravity="center_horizontal"
 
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="@dimen/activity_margin_degrees"
         android:layout_alignParentBottom="true"
         android:layout_alignLeft="@+id/frameLayout"
         android:layout_alignStart="@+id/frameLayout"
