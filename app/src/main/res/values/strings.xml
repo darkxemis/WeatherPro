@@ -12,5 +12,9 @@
 
     <!-- Error Activity -->
     <string name="title_activity_error_connection">WeatherPro</string>
+    <string name="Error_advertise">Oh!! something wrong, please check internet and gps device</string>
+
+    <!-- WEatherActivityFiveDays -->
+    <string name="title_activity_weather_activity_five_days">\t 5Day/3hour</string>
 
 </resources>

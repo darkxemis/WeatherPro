@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.example.josemi.weatherpro.WeatherActivity">
+    tools:context="com.example.josemi.weatherpro.WeatherActivityFiveDays">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -19,11 +19,12 @@
             android:background="?attr/colorPrimary"
             android:fitsSystemWindows="true"
             app:theme="@style/AppTheme"
+            app:menu="@menu/activity_weather_drawer"
             app:popupTheme="@style/AppTheme" />
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_weather" />
+    <include layout="@layout/content_weather_activity_five_days" />
 
 
 </android.support.design.widget.CoordinatorLayout>

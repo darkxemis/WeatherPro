@@ -10,6 +10,9 @@ public class Weather {
 	public Snow snow = new Snow()	;
 	public Clouds clouds = new Clouds();
 	public long dt;
+	public String date;
+
+	public void setDate(String date){this.date = date;}
 	
 	public byte[] iconData;
 	
@@ -18,6 +21,7 @@ public class Weather {
 		private String condition;
 		private String descr;
 		private String icon;
+		private int id_image;
 		
 		
 		private float pressure;
@@ -58,6 +62,12 @@ public class Weather {
 		}
 		public void setHumidity(float humidity) {
 			this.humidity = humidity;
+		}
+		public int getImage() {
+			return this.id_image;
+		}
+		public void setImage(int img) {
+			this.id_image = img;
 		}
 		
 		

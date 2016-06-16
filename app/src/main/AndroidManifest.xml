@@ -26,7 +26,19 @@
         <activity
             android:name=".ErrorConnection"
             android:label="@string/title_activity_error_connection"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.josemi.weatherpro.WeatherActivity" />
+        </activity>
+        <activity
+            android:name=".WeatherActivityFiveDays"
+            android:label="@string/title_activity_weather_activity_five_days"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.josemi.weatherpro.WeatherActivity" />
+        </activity>
     </application>
 
 </manifest>

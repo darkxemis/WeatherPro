@@ -12,9 +12,9 @@ class JsonRequest {
     InputStream is = null;
     private static String IMG_URL = "http://openweathermap.org/img/w/";
     private static String API_KEY = "&APPID=155887cf870c42f26bf2577ba1ce785f";
-    private static String OPEN_WEATHER_API = "http://api.openweathermap.org/data/2.5/weather?lat=";
+    //private static String OPEN_WEATHER_API = "http://api.openweathermap.org/data/2.5/weather?lat=";
 
-    protected String JRequest(double latitud, double longitud) {
+    protected String JRequest(double latitud, double longitud, String OPEN_WEATHER_API) {
         try {
             URL url = new URL(OPEN_WEATHER_API + latitud + "&lon=" + longitud + API_KEY);
             con = (HttpURLConnection) url.openConnection();
@@ -67,7 +67,6 @@ class JsonRequest {
         }
         catch(Throwable t) {
             t.printStackTrace();
-            System.out.println("Pepinazo");
         }
         finally {
             try { is2.close(); } catch(Throwable t) {}

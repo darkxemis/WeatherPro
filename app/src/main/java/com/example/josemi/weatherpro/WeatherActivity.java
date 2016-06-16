@@ -1,8 +1,10 @@
 package com.example.josemi.weatherpro;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -16,8 +18,14 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -39,13 +47,16 @@ import java.util.Locale;
 import Model.GPSTracker;
 import Model.Weather;
 
-public class WeatherActivity extends AppCompatActivity {
+public class WeatherActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private TextView temp, cit, dat, des, hum;
     private ImageView imgView, imgView2;
-    JSONWeatherTask request_task;
+    public JSONWeatherTask request_task;
     public double longitud, latitud;
     GPSTracker location;
+    public NetworkInfo mWifi, mMobile;
+    ConnectivityManager connManager;
     public boolean isGpsEnabled;
+    private static String OPEN_WEATHER_API = "http://api.openweathermap.org/data/2.5/weather?lat=";
 
 
     @Override
@@ -54,16 +65,49 @@ public class WeatherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_weather);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher);
 
-        location = new GPSTracker(this);
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        //location = new GPSTracker(this);
         final LocationManager manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         isGpsEnabled = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-        longitud = location.getLongitude();
-        latitud = location.getLatitude();
+        //longitud = location.getLongitude();
+        //latitud = location.getLatitude();
 
+        refreshLocation();
+        loadTextView();
+
+        request_task = new JSONWeatherTask(latitud,longitud,OPEN_WEATHER_API);
+
+        connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        mMobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+        if (mWifi.isConnected() && (longitud != 0 || latitud != 0)) {
+            request_task.execute();
+        } else {
+            if (mMobile.isConnected() && (longitud != 0 && latitud != 0)) {
+                request_task.execute();
+            } else {
+                //Change activity
+                ChangeActivityError();
+            }
+        }
+
+        refreshWeather();
+    }
+
+
+    void loadTextView(){
         String font_path = "font/arial.ttf"; // Fonts that I use to the information
         Typeface TF = Typeface.createFromAsset(getAssets(), font_path);
 
@@ -81,38 +125,88 @@ public class WeatherActivity extends AppCompatActivity {
         cit.setTypeface(TF);
         des.setTypeface(TF);
         hum.setTypeface(TF);
-
-        request_task = new JSONWeatherTask();
-
-        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        NetworkInfo mMobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-
-        if (mWifi.isConnected() && (longitud != 0 || latitud != 0)) {
-            request_task.execute(latitud, longitud);
-        } else {
-            if (mMobile.isConnected() && (longitud != 0 && latitud != 0)) {
-                request_task.execute(latitud, longitud);
-            } else {
-                Toast.makeText(WeatherActivity.this, "No tiene acceso a internet por favor compruebalo en los ajustes",
-                        Toast.LENGTH_LONG).show();
-                //Cambiar de actividad
-                Intent intent = new Intent(this, ErrorConnection.class);
-                startActivity(intent);
-            }
-        }
     }
 
-    private class JSONWeatherTask extends AsyncTask<Double, Void, Weather> {
+    void refreshWeather(){
+        final Handler h = new Handler();
+        final int delay = 8000; //milliseconds
+
+        h.postDelayed(new Runnable() {
+            public void run() {
+                boolean checkNet = checkInternet();
+                /*
+                GPSTracker loc;
+                loc = new GPSTracker(getAppContext());
+                latitud = loc.getLatitude();
+                longitud = loc.getLongitude();
+                */
+                refreshLocation();
+                if(!ErrorConnection.active){
+                    if(checkNet){
+                        if(longitud != 0 && latitud != 0){
+                            if(temp.getText() == ""){
+                                JSONWeatherTask petition = new JSONWeatherTask(latitud,longitud,OPEN_WEATHER_API);
+                                petition.execute();
+                            }
+                        }else {
+                            ChangeActivityError();
+                        }
+                    }else{
+                        ChangeActivityError();
+                    }
+                }
+                h.postDelayed(this, delay);
+            }
+        }, delay);
+    }
+
+    public void refreshLocation(){
+        location = new GPSTracker(this);
+        longitud = location.getLongitude();
+        latitud = location.getLatitude();
+    }
+
+    public String CurrentDate(){
+        return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", java.util.Locale.getDefault()).format(Calendar.getInstance().getTime());
+    }
+
+    public void ChangeActivityError(){
+        Intent intent = new Intent(this, ErrorConnection.class);
+        startActivity(intent);
+    }
+
+    public boolean checkInternet(){
+        mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        mMobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        if(mWifi.isConnected() || mMobile.isConnected()){
+            return true;
+        }
+        return false;
+    }
+
+    public static Context getAppContext() {
+        return WeatherActivity.getAppContext();
+    }
+
+    private class JSONWeatherTask extends AsyncTask<Void, Void, Weather> {
         private ProgressDialog progress = null;
+        double latitude;
+        double longitud;
+        String url;
+
+        public JSONWeatherTask(double latitude, double longitud, String url){
+            this.latitude = latitude;
+            this.longitud = longitud;
+            this.url = url;
+        }
+
 
         @Override
-        protected Weather doInBackground(Double... locale) {
+        protected Weather doInBackground(Void... locale) {
             Weather weather = new Weather();
             JsonRequest request = new JsonRequest();
 
-            String json = request.JRequest(locale[0], locale[1]);
-            System.out.println("putilla" + json);
+            String json = request.JRequest(this.latitude,this.longitud,this.url);
 
             try {
                 weather = JSONWeatherParser.getWeather(json);
@@ -211,6 +305,7 @@ public class WeatherActivity extends AppCompatActivity {
             SimpleDateFormat formatter = new SimpleDateFormat("EEE d MMM yyyy HH:mm:ss", Locale.getDefault());
             String date = formatter.format(d);
 
+
             Locale loc = new Locale("", weather.location.getCountry());
             dat.setText(date);
             cit.setText(weather.location.getCity() + ", " + loc.getDisplayCountry());
@@ -223,7 +318,6 @@ public class WeatherActivity extends AppCompatActivity {
         }
 
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -237,17 +331,81 @@ public class WeatherActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id){
+            case R.id.action_settings:
+                break;
+            case R.id.nav_five:
+                Intent intent = new Intent(this, WeatherActivityFiveDays.class);
+                intent.putExtra("longitud", longitud);
+                intent.putExtra("latitud",latitud);
+                startActivity(intent);
+                break;
+            case R.id.nav_about:
+                showInfo();
+                break;
+            default:
+                break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    public String CurrentDate(){
-        return new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", java.util.Locale.getDefault()).format(Calendar.getInstance().getTime());
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+        switch (id){
+            case R.id.action_settings:
+                break;
+            case R.id.nav_five:
+                Intent intent = new Intent(this, WeatherActivityFiveDays.class);
+                intent.putExtra("longitud", longitud);
+                intent.putExtra("latitud",latitud);
+                startActivity(intent);
+                break;
+            case R.id.nav_about:
+                showInfo();
+                break;
+            default:
+                break;
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    void showInfo(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        // Setting Dialog Title
+        alertDialog.setTitle("WeatherPro");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("WeatherPro has been created by Josemi for the project school. All rights reserved ");
+
+        // On pressing Settings button
+        alertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        // Showing Alert Message
+        alertDialog.show();
+    }
+    @Override
+    public void onDestroy()
+    {
+        this.finish();
+        System.exit(0);
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
 }

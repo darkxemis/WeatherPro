@@ -11,9 +11,17 @@
  */
 package com.example.josemi.weatherpro;
 
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 import Model.Weather;
 import Model.Location;
@@ -58,19 +66,58 @@ public class JSONWeatherParser {
 		weather.temperature.setMinTemp(getFloat("temp_min", mainObj));
 		weather.temperature.setTemp(getFloat("temp", mainObj));
 		weather.dt = getLong("dt", jObj);
-		
 		// Wind
 		JSONObject wObj = getObject("wind", jObj);
 		weather.wind.setSpeed(getFloat("speed", wObj));
-		weather.wind.setDeg(getFloat("deg", wObj));
-		
+		//weather.wind.setDeg(getFloat("deg", wObj)); Open weather has been deleted this object
 		// Clouds
 		JSONObject cObj = getObject("clouds", jObj);
 		weather.clouds.setPerc(getInt("all", cObj));
-		
-		// We download the icon to show
 
+		// We download the icon to show
 		return weather;
+	}
+
+	public static ArrayList<Weather> getWeatherArray(String data) throws JSONException {
+		ArrayList<Weather> array_weather = new ArrayList<Weather>();
+		JSONObject jObj = new JSONObject(data);
+
+		JSONArray jArr = jObj.getJSONArray("list");
+
+		for(int i=0; i< jArr.length();i++){
+			JSONObject JSONWeather = jArr.getJSONObject(i);
+			Weather weather = new Weather();
+			//Set City
+			JSONObject city = getObject("city", jObj);
+			Model.Location loc = new Model.Location();
+			loc.setCity(getString("name", city));
+			weather.location = loc;
+
+			//Set Date
+			long mil = getLong("dt",JSONWeather);
+			Date d = new Date(mil * 1000);
+			SimpleDateFormat formatter = new SimpleDateFormat("EEE d MMM yyyy HH:mm:ss", Locale.getDefault());
+			String date = formatter.format(d);
+			weather.setDate(date);
+			//Set temperature
+			JSONObject main = getObject("main",JSONWeather);
+			float tempe = getFloat("temp", main);
+			tempe -= 273.15;
+			weather.temperature.setTemp(tempe);
+			//Set humidity
+			weather.currentCondition.setHumidity(getInt("humidity", main));
+			//Set Weather
+			JSONArray weath = JSONWeather.getJSONArray("weather");
+			JSONObject weat = weath.getJSONObject(0);
+			weather.currentCondition.setCondition(getString("main", weat));
+			weather.currentCondition.setDescr(getString("description", weat));
+			weather.currentCondition.setIcon(getString("icon", weat));
+			weather.currentCondition.setImage(getIdImage(getString("icon", weat)));
+
+			array_weather.add(weather);
+		}
+
+		return array_weather;
 	}
 	
 	
@@ -94,4 +141,68 @@ public class JSONWeatherParser {
 	private static int  getInt(String tagName, JSONObject jObj) throws JSONException {
 		return jObj.getInt(tagName);
 	}
+
+	public static int getIdImage(String code) {
+		int id = -1;
+		switch (code) {
+			case "01d":
+				id = R.drawable.d1;
+			break;
+			case "01n":
+				id = R.drawable.n1;
+			break;
+			case "02d":
+				id = R.drawable.d2;
+			break;
+			case "02n":
+				id = R.drawable.n2;
+			break;
+			case "03d":
+				id = R.drawable.d3;
+			break;
+			case "03n":
+				id = R.drawable.n3;
+			break;
+			case "04d":
+				id = R.drawable.d4;
+			break;
+			case "04n":
+				id = R.drawable.n4;
+			break;
+			case "09d":
+				id = R.drawable.d9;
+			break;
+			case "09n":
+				id = R.drawable.n9;
+			break;
+			case "10d":
+				id = R.drawable.d10;
+			break;
+			case "10n":
+				id = R.drawable.n10;
+			break;
+			case "11d":
+				id = R.drawable.d11;
+			break;
+			case "11n":
+				id = R.drawable.n11;
+			break;
+			case "13d":
+				id = R.drawable.d13;
+			break;
+			case "13n":
+				id = R.drawable.n13;
+			break;
+			case "50d":
+				id = R.drawable.d50;
+			break;
+			case "50n":
+				id = R.drawable.n50;
+			break;
+			default:
+				break;
+		}
+		return id;
+	}
+
 }
